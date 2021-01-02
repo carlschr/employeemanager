@@ -1,6 +1,7 @@
 const sql = require('mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+const view = require('./view');
 
 const connection = sql.createConnection({
     host: "localhost",
@@ -30,21 +31,35 @@ const runApp = () => {
         type: 'list',
         name: 'actions',
         message: 'What action would you like to perform?',
-        choices: ['View All Departments', 'View All Employees', 'View Managers']
+        choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View Managers', 'Add Department', 'Add Role', 'Add Employee', 'Quit'],
+        loop: false
     })
     .then(answer => {
         //Decides which function to run based on input
         switch (answer.actions) {
             case 'View All Departments':
-                allDepts();
+                view.allDepts(connection, runApp);
+                break;
+            case 'View All Roles':
+                view.allRoles(connection, runApp);
                 break;
             case 'View All Employees':
-                allEmployees();
+                view.allEmployees(connection, runApp);
                 break;
             case 'View Managers':
-                allManagers();
+                view.allManagers(connection, runApp);
                 break;
-            //If something goes run it reruns the app
+            case 'Add Department':
+                break;
+            case 'Add Role':
+                break;
+            case 'Add Employee':
+                break;
+            case 'Quit':
+                console.log('Goodbye.')
+                connection.end();
+                break;
+            //If something goes wrong, it reruns the app
             default:
                 runApp();
                 break;
@@ -52,52 +67,3 @@ const runApp = () => {
     });
 };
 
-//Function to retrieve a list of departments
-const allDepts = () => {
-    connection.query('SELECT * FROM department', (err, res) => {
-        if (err) {
-            console.error(err);
-            runApp();
-        };
-        console.log('\n');
-        console.table(res);
-    });
-};
-
-//Function to retrieve a list of all employees
-const allEmployees = () => {
-    //Query selects columns from all three tables and orders by last name
-    connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM employee LEFT JOIN role ON role_id = role.id INNER JOIN department ON department.id = department_id ORDER BY employee.last_name', (err, res) => {
-        if (err) {
-            console.error(err);
-            runApp();
-        };
-        //Two loops compare the employees and pull the matching manager name for each manager_id
-        res.forEach(employee => {
-            res.forEach(otherEmployee => {
-                //If the manager_id is already deleted it moves to the next employee
-                if (employee.hasOwnProperty('manager_id')) {
-                    if (employee.manager_id === otherEmployee.id) {
-                        employee.manager = `${otherEmployee.first_name} ${otherEmployee.last_name}`;
-                        delete employee.manager_id;
-                    } else if (employee.manager_id === 0) {
-                        employee.manager = null;
-                        delete employee.manager_id;
-                    };
-                };
-            });
-        });
-        console.log('\n');
-        console.table(res);
-    });
-};
-
-const allManagers = () => {
-    connection.query('SELECT employee.id, first_name, last_name, title, salary FROM employee LEFT JOIN role ON role_id = role.id WHERE manager_id = 0', (err, res) => {
-        if (err) {
-            console.error(err);
-            runApp();
-        };
-        console.table(res);
-    });
-};
