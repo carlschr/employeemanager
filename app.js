@@ -1,7 +1,7 @@
 const sql = require('mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-const view = require('./view');
+const view = require('./routes/view');
 
 const connection = sql.createConnection({
     host: "localhost",
