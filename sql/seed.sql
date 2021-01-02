@@ -13,7 +13,7 @@ INSERT INTO role (title, salary, department_id)
 VALUES ('Human Resources Representative', 30000, 3), ('Human Resources Specialist', 45000, 3), ('Human Resources Analyst', 50000, 3), ('Human Resources Manager', 80000, 3);
 
 INSERT INTO role (title, salary, department_id)
-VALUES ('Public Relations Agent', 35000, 4), ('Public Relations Publicist', 40000, 4), ('Public Relations Strategist', 55000, 4), ('Pubic Relations Manager', 80000, 4);
+VALUES ('Public Relations Agent', 35000, 4), ('Public Relations Publicist', 40000, 4), ('Public Relations Strategist', 55000, 4), ('Public Relations Manager', 80000, 4);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES ('Alex', 'DiFabio', 4, 0), ('Chris', 'Carlson', 8, 0), ('Casey', 'Dziuba', 12, 0), ('Matt', 'Bunker', 16, 0);
