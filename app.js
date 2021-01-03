@@ -1,9 +1,13 @@
+//npm modules
 const sql = require('mysql');
 const inquirer = require('inquirer');
+
+//local modules
 const view = require('./routes/view');
 const add = require('./routes/add');
 const update = require('./routes/update');
 
+//Creates connection to be used throughout the app
 const connection = sql.createConnection({
     host: "localhost",
   
@@ -18,23 +22,28 @@ const connection = sql.createConnection({
     database: "company_DB"
 });
 
+//Starts connection
 connection.connect(err => {
     if (err) {
         console.log(`Something went wrong: ${err.message}`);
         return;
     };
+    //Greeting message
     console.log('------------------------------------------\nWelcome to the Employee Management System!\n------------------------------------------');
     runApp();
 });
 
+//Main features of the application are all found within this function
 const runApp = () => {
+    //Fist prompt to decide what route to take
     inquirer.prompt({
         type: 'list',
         name: 'actions',
         message: 'What action would you like to perform?',
         choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View Managers', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Quit'],
         loop: false
-    }).then(answer => {
+    })
+    .then(answer => {
         //Decides which function to run based on input
         switch (answer.actions) {
             case 'View All Departments':
@@ -81,20 +90,24 @@ const departmentInq = () => {
         type: 'input',
         name: 'name',
         message: 'What is the name of the new department?'
-    }).then(answer => {
+    })
+    .then(answer => {
         add.department(connection, runApp, {name: answer.name});
     });
 };
 
 //Function to acquire the necessary data to create a role
 const roleInq = () => {
+    //Empty array to hold depts for use in list prompt
     let depts = [];
+    //Queries for departments to populate above array
     connection.query('SELECT department_name, id FROM department', (err, res) => {
         if (err) {
             console.log(`Something went wrong: ${err.message}`);
             runApp();
         };
 
+        //Populates array with dept names
         res.forEach(dept => {
             depts.push(dept.department_name);
         });
@@ -113,8 +126,10 @@ const roleInq = () => {
             message: 'To which department does this role belong?',
             choices: depts,
             loop: false
-        }]).then(answers => {
+        }])
+        .then(answers => {
             let deptID = 0;
+            //Uses user choice to find the corresponding id
             res.forEach(dept => {
                 if (dept.department_name === answers.dept) deptID = dept.id;
             });
@@ -125,8 +140,10 @@ const roleInq = () => {
 
 //Function to acquire the necessary data to create a role
 const employeeInq = () => {
+    //Empty arrays to hold roles and managers for use in list prompt
     let roles = [];
     let managers = [];
+    //Queries for roles and managers
     connection.query('SELECT role.id AS role_id, employee.id AS employee_id, title, first_name, last_name FROM role LEFT JOIN employee ON manager_id = 0 AND role.id = role_id', (err, res) => {
         if (err) {
             console.log(`Something went wrong: ${err.message}`);
@@ -134,13 +151,16 @@ const employeeInq = () => {
             return;
         };
 
+        //Populates roles and managers arrays
         res.forEach(roleAndManager => {
             roles.push(roleAndManager.title);
+            //Avoids pushing null to the array
             if (roleAndManager.first_name !== null) {
                 managers.push(`${roleAndManager.first_name} ${roleAndManager.last_name}`);
             };
         });
 
+        //Adds an additional option to the list choices array for managers
         managers.push('They are a manager');
 
         inquirer.prompt([{
@@ -163,9 +183,12 @@ const employeeInq = () => {
             message: 'Who will manage this employee?',
             choices: managers,
             loop: false
-        }]).then(answers => {
+        }])
+        .then(answers => {
             let roleID = 0;
             let managerID = 0;
+            //Uses user choices to choose the role id and manager id
+            //If the user chose "They are a manager", the manager id will be 0
             res.forEach(roleAndManager => {
                 if (roleAndManager.title === answers.role) roleID = roleAndManager.role_id;
                 if (`${roleAndManager.first_name} ${roleAndManager.last_name}` === answers.manager) managerID = roleAndManager.employee_id;
@@ -177,9 +200,11 @@ const employeeInq = () => {
 
 //Function to acquire the necessary data to update a role
 const updateRoleInq = () => {
+    //Empty arrays to hold choices
     let employees = [];
     let roles = [];
 
+    //Queries for employee info
     connection.query('SELECT employee.id, first_name, last_name, role_id FROM employee', (err, res) => {
         if (err) {
             console.log(`Something went wrong: ${err.message}`);
@@ -187,17 +212,19 @@ const updateRoleInq = () => {
             return;
         };
 
+        //Populates employee choices array
         res.forEach(employee => {
             employees.push(`${employee.first_name} ${employee.last_name}`);
         });
 
+        //Additional query for roles
         connection.query('SELECT role.id, title FROM role', (error, response) => {
             if (error) {
                 console.log(`Something went wrong: ${error.message}`);
                 runApp();
                 return;
             };
-
+            //Populates role choices array
             response.forEach(role => {
                 roles.push(role.title);
             });
@@ -214,10 +241,11 @@ const updateRoleInq = () => {
                 message: 'Select a new role:',
                 choices: roles,
                 loop: false
-            }]).then(answers => {
+            }])
+            .then(answers => {
                 let roleID = 0;
                 let employeeID = 0;
-
+                //Uses user input to assign role and employee id
                 response.forEach(role => {
                     if (role.title === answers.role) roleID = role.id;
                 });
@@ -232,6 +260,7 @@ const updateRoleInq = () => {
 };
 
 //Function to acquire the necessary data to update a manager
+//Almost one-to-one to the above function but for manager rather than role
 const updateManagerInq = () => {
     let employees = [];
     let managers = [];
