@@ -7,7 +7,7 @@ module.exports = {
                 cb();
                 return;
             };
-            console.log('Department created.');
+            console.log('\n', 'Department created.', '\n');
             cb();
         });
     },
@@ -19,7 +19,7 @@ module.exports = {
                 cb();
                 return;
             };
-            console.log('Role created.');
+            console.log('\n', 'Role created.', '\n');
             cb();
         });
     },
@@ -31,7 +31,7 @@ module.exports = {
                 cb();
                 return;
             };
-            console.log('Employee added.');
+            console.log('\n', 'Employee added.', '\n');
             cb();
         });
     }

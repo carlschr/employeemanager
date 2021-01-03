@@ -1,4 +1,5 @@
 const cTable = require('console.table');
+
 module.exports = {
     //Function to retrieve a list of departments
     allDepts(connection, cb){
@@ -10,6 +11,8 @@ module.exports = {
             };
             console.log('\n');
             console.table(res);
+            console.log('\n');
+
             cb();
         });
     },
@@ -22,7 +25,11 @@ module.exports = {
                 cb();
                 return;
             };
+
+            console.log('\n');
             console.table(res);
+            console.log('\n');
+
             cb();
         });
     },
@@ -51,8 +58,11 @@ module.exports = {
                     };
                 });
             });
+
             console.log('\n');
             console.table(res);
+            console.log('\n');
+
             cb();
         });
     },
@@ -64,7 +74,11 @@ module.exports = {
                 cb();
                 return;
             };
+
+            console.log('\n');
             console.table(res);
+            console.log('\n');
+
             cb();
         });
     }
