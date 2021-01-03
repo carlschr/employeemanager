@@ -32,7 +32,7 @@ const runApp = () => {
         type: 'list',
         name: 'actions',
         message: 'What action would you like to perform?',
-        choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View Managers', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Empoyee Manager', 'Quit'],
+        choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View Managers', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Quit'],
         loop: false
     }).then(answer => {
         //Decides which function to run based on input
@@ -61,7 +61,7 @@ const runApp = () => {
             case 'Update Employee Role':
                 updateRoleInq();
                 break;
-            case 'Update Empoyee Manager':
+            case 'Update Employee Manager':
                 updateManagerInq();
                 break;
             case 'Quit':
