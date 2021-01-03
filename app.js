@@ -2,8 +2,7 @@ const sql = require('mysql');
 const inquirer = require('inquirer');
 const view = require('./routes/view');
 const add = require('./routes/add');
-const { allDepts } = require('./routes/view');
-const { role } = require('./routes/add');
+const update = require('./routes/update');
 
 const connection = sql.createConnection({
     host: "localhost",
@@ -33,7 +32,7 @@ const runApp = () => {
         type: 'list',
         name: 'actions',
         message: 'What action would you like to perform?',
-        choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View Managers', 'Add Department', 'Add Role', 'Add Employee', 'Quit'],
+        choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View Managers', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Empoyee Manager', 'Quit'],
         loop: false
     }).then(answer => {
         //Decides which function to run based on input
@@ -58,6 +57,12 @@ const runApp = () => {
                 break;
             case 'Add Employee':
                 employeeInq();
+                break;
+            case 'Update Employee Role':
+                updateRoleInq();
+                break;
+            case 'Update Empoyee Manager':
+                updateManagerInq();
                 break;
             case 'Quit':
                 console.log('Goodbye.')
@@ -167,5 +172,117 @@ const employeeInq = () => {
             });
             add.employee(connection, runApp, {firstName: answers.first, lastName: answers.last, roleID: roleID, managerID: managerID});
         })
+    });
+};
+
+//Function to acquire the necessary data to update a role
+const updateRoleInq = () => {
+    let employees = [];
+    let roles = [];
+
+    connection.query('SELECT employee.id, first_name, last_name, role_id FROM employee', (err, res) => {
+        if (err) {
+            console.log(`Something went wrong: ${err.message}`);
+            runApp();
+            return;
+        };
+
+        res.forEach(employee => {
+            employees.push(`${employee.first_name} ${employee.last_name}`);
+        });
+
+        connection.query('SELECT role.id, title FROM role', (error, response) => {
+            if (error) {
+                console.log(`Something went wrong: ${error.message}`);
+                runApp();
+                return;
+            };
+
+            response.forEach(role => {
+                roles.push(role.title);
+            });
+
+            inquirer.prompt([{
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee\'s role would you like to update?',
+                choices: employees,
+                loop: false
+            }, {
+                type: 'list',
+                name: 'role',
+                message: 'Select a new role:',
+                choices: roles,
+                loop: false
+            }]).then(answers => {
+                let roleID = 0;
+                let employeeID = 0;
+
+                response.forEach(role => {
+                    if (role.title === answers.role) roleID = role.id;
+                });
+                res.forEach(employee => {
+                    if (`${employee.first_name} ${employee.last_name}` === answers.employee) employeeID = employee.id; 
+                });
+
+                update.role(connection, runApp, {roleID: roleID, employeeID: employeeID});
+            });
+        });
+    });
+};
+
+//Function to acquire the necessary data to update a manager
+const updateManagerInq = () => {
+    let employees = [];
+    let managers = [];
+
+    connection.query('SELECT employee.id, first_name, last_name, manager_id FROM employee', (err, res) => {
+        if (err) {
+            console.log(`Something went wrong: ${err.message}`);
+            runApp();
+            return;
+        };
+
+        res.forEach(employee => {
+            employees.push(`${employee.first_name} ${employee.last_name}`);
+        });
+
+        connection.query('SELECT employee.id, first_name, last_name FROM employee WHERE manager_id = 0', (error, response) => {
+            if (error) {
+                console.log(`Something went wrong: ${error.message}`);
+                runApp();
+                return;
+            };
+
+            response.forEach(manager => {
+                managers.push(`${manager.first_name} ${manager.last_name}`);
+            });
+
+            inquirer.prompt([{
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee\'s manager would you like to update?',
+                choices: employees,
+                loop: false
+            }, {
+                type: 'list',
+                name: 'manager',
+                message: 'Select a new manager:',
+                choices: managers,
+                loop: false
+            }]).then(answers => {
+                let managerID = 0;
+                let employeeID = 0;
+
+                response.forEach(manager => {
+                    if (`${manager.first_name} ${manager.last_name}` === answers.manager) managerID = manager.id;
+                });
+                res.forEach(employee => {
+                    if (`${employee.first_name} ${employee.last_name}` === answers.employee) employeeID = employee.id; 
+                });
+
+                update.manager(connection, runApp, {managerID: managerID, employeeID: employeeID});
+            });
+        });
     });
 };
