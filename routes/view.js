@@ -11,7 +11,6 @@ module.exports = {
             };
             console.log('\n');
             console.table(res);
-            console.log('\n');
 
             cb();
         });
@@ -28,7 +27,6 @@ module.exports = {
 
             console.log('\n');
             console.table(res);
-            console.log('\n');
 
             cb();
         });
@@ -61,7 +59,6 @@ module.exports = {
 
             console.log('\n');
             console.table(res);
-            console.log('\n');
 
             cb();
         });
@@ -77,7 +74,6 @@ module.exports = {
 
             console.log('\n');
             console.table(res);
-            console.log('\n');
 
             cb();
         });
